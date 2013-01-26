@@ -1,0 +1,9 @@
+parameters:
+    service_rest_utils.response_builder_factory.class: Itr\ResponseBuilderBundle\Service\ResponseBuilderFactory
+
+services:
+    service_rest_utils.response_builder_factory:
+        class: %service_rest_utils.response_builder_factory.class%
+
+    response_builder_factory:
+        alias: service_rest_utils.response_builder_factory

@@ -1,0 +1,15 @@
+{
+    "name": "itr/responsebuilder-bundle",
+    "description": "Allows you easily create JSON/XML API response from different types of objects",
+    "keywords": ["api","response", "json", "xml"],
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [],
+    "require": {
+        "symfony/framework-bundle": "2.*"
+    },
+    "autoload": {
+        "psr-0": { "Itr\\ResponseBuilderBundle": "" }
+    },
+    "target-dir": "Itr/ResponseBuilderBundle"
+}
