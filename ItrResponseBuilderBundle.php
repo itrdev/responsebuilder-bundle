@@ -1,6 +1,6 @@
 <?php
 
-namespace Itr\RestUtilsBundle;
+namespace Itr\ResponseBuilderBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
