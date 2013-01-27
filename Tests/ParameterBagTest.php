@@ -15,7 +15,7 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $default = array('user' => 'test', 'password' => '123456');
         $pb = new ParameterBag($default);
 
-        $this->assertEquals($default, $pb->toArray());
+        $this->assertEquals($default, $pb->toArray()); // initial and result arrays must be the same
     }
 
     public function testSetSimple()
@@ -25,6 +25,11 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $value = 'some value';
         $pb->set($path, $value);
         $result = $pb->toArray();
+
+        // such path should be expanded as:
+        //
+        // first.second = "some value" =>
+        // array("first" => array("second" => "some value"));
 
         $this->assertCount(1, $result);
         $this->assertArrayHasKey('first', $result);
@@ -37,6 +42,12 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $value = 'some new value';
         $pb->set($path, $value);
         $result = $pb->toArray();
+
+        // such path will add new value live this:
+        //
+        // here in "first" array added new key => value pair
+        // first.new_second = "some value" =>
+        // array("first" => array("second" => "some value", "new_second" => "some new value"));
 
         $this->assertArrayHasKey('new_second', $result['first']);
         $this->assertEquals($value, $result['first']['new_second']);
@@ -74,6 +85,8 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $pb->setEntity('account', $account);
         $result = $pb->toArray();
 
+        // entity will be expanded with all properties that have a public access or getter
+
         $this->assertInternalType('array', $result);
         $this->assertArrayHasKey('account', $result);
         $this->assertEquals($account->getBlocked(), $result['account']['blocked']);
@@ -101,6 +114,8 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $account = $this->setupAccountEntity();
         $profile = $this->setupProfileEntity();
         $profile->setAccount($account);
+
+        // each subentity of the entity will be expanded
 
         $pb->setEntity('profile', $profile);
         $result = $pb->toArray();
@@ -133,6 +148,8 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $sessions = array($session1, $session2, $session3, $session4);
         $account = $this->setupAccountEntity();
         $account->setSessions($sessions);
+
+        // each entity with collection of entities will be expanded as array or arrays
 
         $pb->setEntity('account', $account);
         $result = $pb->toArray();
