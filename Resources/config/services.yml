@@ -4,6 +4,7 @@ parameters:
 services:
     itr_response_builder.response_builder_factory:
         class: %service_rest_utils.response_builder_factory.class%
+        arguments: [%itr_response_builder.default_format%]
 
     response_builder_factory:
         alias: service_rest_utils.response_builder_factory

@@ -9,18 +9,22 @@ class ResponseBuilderFactory
     const FORMAT_JSON = 'json';
     const FORMAT_XML = 'xml';
 
-    const BUILDER_NAMESPACE = 'Itr\ResponseBuilderBundle\ParametersBuilder\ResponseBuilder';
+    const BUILDER_NAMESPACE = 'Itr\ResponseBuilderBundle\ResponseBuilder';
     const RESPONSE_BUILDER_CLASS_POSTFIX = 'ResponseBuilder';
 
     protected $_allowedFormats = array(
       self::FORMAT_JSON,
-      self::FORMAT_XML,
+//      self::FORMAT_XML,
     );
 
     private $_defaultFormat;
 
     public function __construct($defaultFormat)
     {
+        if (!in_array($defaultFormat, $this->_allowedFormats))
+        {
+            throw new InvalidBuilderFormatException("Invalid builder format: " . $defaultFormat);
+        }
         $this->_defaultFormat = $defaultFormat;
     }
 
