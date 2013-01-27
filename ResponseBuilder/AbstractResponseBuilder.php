@@ -18,5 +18,5 @@ abstract class AbstractResponseBuilder
         return new ParameterBag();
     }
 
-    abstract protected function _prepareResponseObject($httpResponseCode, $data);
+    abstract protected function _prepareResponseObject($httpResponseCode, array $data);
 }
