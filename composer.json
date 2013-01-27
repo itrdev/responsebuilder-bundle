@@ -1,6 +1,6 @@
 {
     "name": "itr/responsebuilder-bundle",
-    "description": "Allows you easily create JSON/XML API response from Doctrine entities.",
+    "description": "Allows you easily create JSON/XML API response from the different types of objects.",
     "keywords": ["api","response", "json", "xml", "doctrine"],
     "type": "symfony-bundle",
     "license": "MIT",
