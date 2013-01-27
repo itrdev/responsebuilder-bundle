@@ -14,7 +14,6 @@ class ResponseBuilderFactory
 
     protected $_allowedFormats = array(
       self::FORMAT_JSON,
-//      self::FORMAT_XML,
     );
 
     private $_defaultFormat;

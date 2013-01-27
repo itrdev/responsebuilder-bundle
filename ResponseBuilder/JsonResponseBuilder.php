@@ -7,9 +7,16 @@ use Symfony\Component\HttpFoundation\Response;
 class JsonResponseBuilder extends AbstractResponseBuilder
 {
 
-    protected function _prepareResponseObject($httpResponseCode, array $data)
+    /**
+     * Builds response as a JSON object
+     *
+     * @param array $data
+     * @param int $httpStatusCode
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function _prepareResponseObject(array $data, $httpStatusCode = 200)
     {
-        return new Response(json_encode($data), $httpResponseCode, array(
+        return new Response(json_encode($data), $httpStatusCode, array(
             'Content-Type' => 'application/json',
         ));
     }

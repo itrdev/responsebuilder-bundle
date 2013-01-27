@@ -7,16 +7,36 @@ use Symfony\Component\HttpFoundation\Response;
 abstract class AbstractResponseBuilder
 {
 
-    public function build($httpResponseCode, $parameters = array())
+    /**
+     * Converts ParameterBag or array into Response object
+     *
+     * @param array $parameters
+     * @param int $httpStatusCode
+     * @return mixed
+     */
+    public function build($parameters = array(), $httpStatusCode = 200)
     {
-        $parameters = ($parameters instanceof ParameterBag) ? $parameters->toArray() : $parameters;
-        return $this->_prepareResponseObject($httpResponseCode, $parameters);
+        $parameters = ($parameters instanceof ParameterBag) ? $parameters->toArray() : (array) $parameters;
+        return $this->_prepareResponseObject($httpStatusCode, $parameters);
     }
 
+    /**
+     * Returns new ParameterBag object
+     *
+     * @return ParameterBag
+     */
     public function createParameterBag()
     {
         return new ParameterBag();
     }
 
-    abstract protected function _prepareResponseObject($httpResponseCode, array $data);
+    /**
+     * This method should be implemented by the particular ResponseBuilder type object
+     *
+     * @abstract
+     * @param array $data
+     * @param int $httpResponseCode
+     * @return mixed
+     */
+    abstract protected function _prepareResponseObject(array $data, $httpResponseCode = 200);
 }

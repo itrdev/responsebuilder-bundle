@@ -38,7 +38,7 @@ class BuilderFactoryTest extends \PHPUnit_Framework_TestCase
         $value = 'some value';
         $pb->set('first.second', $value);
         /** @var \Symfony\Component\HttpFoundation\Response $response  */
-        $response = $jsonBuilder->build(200, $pb);
+        $response = $jsonBuilder->build($pb);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
         $this->assertJsonStringEqualsJsonString($response->getContent(), json_encode(array('first' => array('second' => $value))));
