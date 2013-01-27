@@ -17,7 +17,7 @@ abstract class AbstractResponseBuilder
     public function build($parameters = array(), $httpStatusCode = 200)
     {
         $parameters = ($parameters instanceof ParameterBag) ? $parameters->toArray() : (array) $parameters;
-        return $this->_prepareResponseObject($httpStatusCode, $parameters);
+        return $this->_prepareResponseObject($parameters, $httpStatusCode);
     }
 
     /**
