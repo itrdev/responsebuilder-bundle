@@ -141,6 +141,7 @@ class ParameterBag
         }
     }
 
+    // TODO: remove method should remove key and value, not just set value as null
     public function remove($key)
     {
         $element = &$this->_findInjectionPoint($key);
