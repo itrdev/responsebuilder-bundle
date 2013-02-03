@@ -118,7 +118,6 @@ class ParameterBag
 
     public function setEntityCollection($key, $collection, $postProcessor = null)
     {
-        $this->_findInjectionPoint($key, true);
         $injectionPath = $key . self::KEY_PATH_SEPARATOR . self::KEY_ARRAY_ELEMENT;
         foreach ($collection as $item)
         {
@@ -205,19 +204,27 @@ class ParameterBag
         {
             if (!$allowCreation && is_null($element))
             {
-                return null;
+                $element = null;
+                return $element;
             }
             if (self::KEY_ARRAY_ELEMENT == $currentKey)
             {
                 $element = (is_array($element)) ? $element : array();
-                array_push($element, null);
-                end($element);
-                return $element[key($element)];
+                if (count($path) > 0) {
+                    $currentKey = array_shift($path);
+                    end($element);
+                    return $element[key($element)][$currentKey];
+                } else {
+                    array_push($element, null);
+                    end($element);
+                    return $element[key($element)];
+                }
             }
             if (is_null($element))
             {
                 $element = array($currentKey => null);
             }
+
             $element = &$element[$currentKey];
         }
         return $element;

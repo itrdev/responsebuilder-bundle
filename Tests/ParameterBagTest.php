@@ -176,7 +176,6 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $session3->setAccount($this->setupAccountEntity());
         $session4 = $this->setupSessionEntity();
         $session4->setAccount($this->setupAccountEntity());
-
         $sessions = array($session1, $session2, $session3, $session4);
         $account = $this->setupAccountEntity();
         $account->setSessions($sessions);
@@ -190,6 +189,8 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         // TODO: here we have an account entity in the sessions array, a bit weird behavior
         $this->assertEquals($session1->getSession(), $result['account']['sessions'][0]['session']);
         $this->assertEquals($session2->getSession(), $result['account']['sessions'][1]['session']);
+        $this->assertEquals($session3->getSession(), $result['account']['sessions'][2]['session']);
+        $this->assertEquals($session4->getSession(), $result['account']['sessions'][3]['session']);
     }
 
     protected function setupAccountEntity()
