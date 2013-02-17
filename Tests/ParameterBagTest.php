@@ -2,6 +2,7 @@
 
 namespace Itr\ResponseBuilderBundle\Tests;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Itr\ResponseBuilderBundle\ResponseBuilder\ResponseBuilderFactory;
 use Itr\ResponseBuilderBundle\ResponseBuilder\ParameterBag;
 use Itr\ResponseBuilderBundle\Tests\Fixture\Entity\Account;
@@ -269,6 +270,37 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('new', $result['some']);
         $this->assertArrayHasKey('foo', $result['some']['new']);
         $this->assertEquals('test', $result['some']['new']['foo']);
+    }
+
+    public function testEntityCollection()
+    {
+        $pb = new ParameterBag();
+        $session1 = $this->setupSessionEntity();
+        $session1->setAccount($this->setupAccountEntity());
+        $session2 = $this->setupSessionEntity();
+        $session2->setAccount($this->setupAccountEntity());
+        $session3 = $this->setupSessionEntity();
+        $session3->setAccount($this->setupAccountEntity());
+        $session4 = $this->setupSessionEntity();
+        $session4->setAccount($this->setupAccountEntity());
+
+        $sessionsCollection = new ArrayCollection();
+        $sessionsCollection->add($session1);
+        $sessionsCollection->add($session2);
+        $sessionsCollection->add($session3);
+        $sessionsCollection->add($session4);
+        $account = $this->setupAccountEntity();
+        $account->setSessions($sessionsCollection);
+
+        $pb->set('account', $account);
+        $result = $pb->toArray();
+        $this->assertArrayHasKey('sessions', $result['account']);
+        $this->assertInternalType('array', $result['account']['sessions']);
+
+        $this->assertEquals($session1->getSession(), $result['account']['sessions'][0]['session']);
+        $this->assertEquals($session2->getSession(), $result['account']['sessions'][1]['session']);
+        $this->assertEquals($session3->getSession(), $result['account']['sessions'][2]['session']);
+        $this->assertEquals($session4->getSession(), $result['account']['sessions'][3]['session']);
     }
 
     protected function setupAccountEntity()
