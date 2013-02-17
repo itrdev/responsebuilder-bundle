@@ -14,4 +14,3 @@ TODO
 ====
 -   Write the documentation.
 -   ParameterBag code refactoring.
--   Add ability to set entity and entity collection through the magic method __set.
