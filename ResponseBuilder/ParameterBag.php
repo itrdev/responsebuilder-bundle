@@ -69,16 +69,13 @@ class ParameterBag
                 $conversionArray[$property->getName()] = $this->processPropertyValue($property, $value);
 
             } catch (ExecuteAsDeferredEntityException $e) {
-                // Property is an entity, so process it recursively, but only after the initial array is built, i.e.
-                // via the deferredExecutionQueue
                 $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'entity' => $value));
 
             } catch (ExecuteAsDeferredCollectionException $e) {
-                // Property is an collection, so process it recursively, but only after the initial array is built, i.e.
-                // via the deferredExecutionQueue
                 $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'collection' => $value));
             }
         }
+
         // Updating parameters
         $element = $conversionArray;
         // Executing deferred entity & collection insertions
@@ -173,15 +170,15 @@ class ParameterBag
 
     protected function processPropertyValue($property, $value = null)
     {
-        if (is_object($value) && $value instanceof \DateTime) {
+        if ($value instanceof \DateTime) {
             return $value->getTimestamp();
         }
 
-        if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \Doctrine\Common\Collections\Collection) {
+        if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \ArrayAccess) {
             throw new ExecuteAsDeferredEntityException();
         }
 
-        if ((is_array($value) && is_object(current($value)) && !current($value) instanceof \stdClass) || $value instanceof \Doctrine\Common\Collections\Collection) {
+        if (is_array($value) || $value instanceof \ArrayAccess) {
             throw new ExecuteAsDeferredCollectionException();
         }
 
