@@ -13,7 +13,6 @@ class ParameterBag
     const GETTER_PREFIX = 'get';
 
     private $parameters;
-    private $processed = array();
 
     public function __construct(array $initialParameters = array())
     {
@@ -22,8 +21,15 @@ class ParameterBag
 
     public function set($key, $value)
     {
-        $data = &$this->_findInjectionPoint($key, true);
-        $data = $value;
+        if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \Traversable) {
+            $this->setEntity($key, $value);
+
+        } elseif ((is_array($value) || $value) instanceof \Traversable && is_object(current($value))) {
+            $this->setEntityCollection($key, $value);
+        } else {
+            $data = &$this->_findInjectionPoint($key, true);
+            $data = $value;
+        }
     }
 
     public function setEntity($key, $entity, $postProcessor = null)
@@ -174,11 +180,11 @@ class ParameterBag
             return $value->getTimestamp();
         }
 
-        if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \ArrayAccess) {
+        if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \Traversable) {
             throw new ExecuteAsDeferredEntityException();
         }
 
-        if (is_array($value) || $value instanceof \ArrayAccess) {
+        if (is_array($value) || $value instanceof \Traversable) {
             throw new ExecuteAsDeferredCollectionException();
         }
 

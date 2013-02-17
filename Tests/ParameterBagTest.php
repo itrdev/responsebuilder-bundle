@@ -185,12 +185,90 @@ class ParameterBagTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('sessions', $result['account']);
         $this->assertInternalType('array', $result['account']['sessions']);
 
-        // TODO: this part isn't working because of wrong injection point finding
-        // TODO: here we have an account entity in the sessions array, a bit weird behavior
         $this->assertEquals($session1->getSession(), $result['account']['sessions'][0]['session']);
         $this->assertEquals($session2->getSession(), $result['account']['sessions'][1]['session']);
         $this->assertEquals($session3->getSession(), $result['account']['sessions'][2]['session']);
         $this->assertEquals($session4->getSession(), $result['account']['sessions'][3]['session']);
+    }
+
+    public function testSetCollectionAndEntitiesThroughSetMethod()
+    {
+        $pb = new ParameterBag();
+        $session1 = $this->setupSessionEntity();
+        $session1->setAccount($this->setupAccountEntity());
+        $session2 = $this->setupSessionEntity();
+        $session2->setAccount($this->setupAccountEntity());
+        $session3 = $this->setupSessionEntity();
+        $session3->setAccount($this->setupAccountEntity());
+        $session4 = $this->setupSessionEntity();
+        $session4->setAccount($this->setupAccountEntity());
+        $sessions = array($session1, $session2, $session3, $session4);
+        $account = $this->setupAccountEntity();
+        $account->setSessions($sessions);
+
+        $pb->set('account', $account);
+        $result = $pb->toArray();
+        $this->assertArrayHasKey('sessions', $result['account']);
+        $this->assertInternalType('array', $result['account']['sessions']);
+
+        $this->assertEquals($session1->getSession(), $result['account']['sessions'][0]['session']);
+        $this->assertEquals($session2->getSession(), $result['account']['sessions'][1]['session']);
+        $this->assertEquals($session3->getSession(), $result['account']['sessions'][2]['session']);
+        $this->assertEquals($session4->getSession(), $result['account']['sessions'][3]['session']);
+
+        $pb = new ParameterBag();
+        $account = $this->setupAccountEntity();
+        $profile = $this->setupProfileEntity();
+        $profile->setAccount($account);
+
+        $pb->set('profile', $profile);
+        $result = $pb->toArray();
+        $this->assertArrayHasKey('account', $result['profile']);
+        $this->assertEquals($account->getEmail(), $result['profile']['account']['email']);
+        $this->assertEquals($account->getUsername(), $result['profile']['account']['username']);
+
+        $pb->{'profile.account.id'} =  0;
+        $result = $pb->toArray();
+
+        $this->assertEquals(0, $result['profile']['account']['id']);
+        $this->assertEquals($account->getEmail(), $result['profile']['account']['email']);
+        $this->assertEquals($account->getUsername(), $result['profile']['account']['username']);
+
+        unset($pb->{'profile.account'});
+        $result = $pb->toArray();
+
+        $this->assertEquals(null, $result['profile']['account']);
+        $this->assertFalse(isset($result['profile']['account']));
+        $this->assertFalse($pb->has('profile.account.username'));
+
+        $pb = new ParameterBag();
+        $path = 'first.second';
+        $value = 'some value';
+        $pb->set($path, $value);
+
+        $this->assertTrue(isset($pb->$path));
+        $this->assertFalse(empty($pb->$path));
+        $this->assertTrue($pb->has($path));
+        $this->assertEquals($pb->get($path), $value);
+        $this->assertEquals($pb->$path, $value);
+
+        unset($pb->$path);
+        $this->assertEquals($pb->$path, null);
+
+        $this->assertEquals($pb->getParameters(), $pb->toArray());
+
+        $value = 'some new value';
+        $this->$path = $value;
+
+        $this->assertEquals($this->$path, $value);
+
+        $pb = new ParameterBag();
+        $pb->set('some.new', array('foo' => 'test', 'bar' => array('3' => 34)));
+        $result = $pb->toArray();
+        $this->assertArrayHasKey('some', $result);
+        $this->assertArrayHasKey('new', $result['some']);
+        $this->assertArrayHasKey('foo', $result['some']['new']);
+        $this->assertEquals('test', $result['some']['new']['foo']);
     }
 
     protected function setupAccountEntity()
