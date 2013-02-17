@@ -9,41 +9,57 @@ class ResponseBuilderFactory
     const FORMAT_JSON = 'json';
     const FORMAT_XML = 'xml';
 
-    const BUILDER_NAMESPACE = 'Itr\ResponseBuilderBundle\ResponseBuilder';
     const RESPONSE_BUILDER_CLASS_POSTFIX = 'ResponseBuilder';
 
-    protected $_allowedFormats = array(
+    protected $allowedFormats = array(
       self::FORMAT_JSON,
     );
 
     private $_defaultFormat;
 
+    /**
+     * @param $defaultFormat
+     * @throws \Itr\ResponseBuilderBundle\Exception\InvalidBuilderFormatException
+     */
     public function __construct($defaultFormat)
     {
-        if (!in_array($defaultFormat, $this->_allowedFormats))
-        {
+        if (!in_array($defaultFormat, $this->allowedFormats)) {
             throw new InvalidBuilderFormatException("Invalid builder format: " . $defaultFormat);
         }
         $this->_defaultFormat = $defaultFormat;
     }
 
+    /**
+     * Returns default builder
+     * @return mixed
+     */
     public function getDefault()
     {
-        return $this->_fetchBuilder($this->_defaultFormat);
+        return $this->fetchBuilder($this->_defaultFormat);
     }
 
+    /**
+     * Returns builder by format
+     * @param $format
+     * @return mixed
+     * @throws \Itr\ResponseBuilderBundle\Exception\InvalidBuilderFormatException
+     */
     public function getBuilderForFormat($format)
     {
-        if (!in_array($format, $this->_allowedFormats))
-        {
+        if (!in_array($format, $this->allowedFormats)) {
             throw new InvalidBuilderFormatException("Invalid builder format: " . $format);
         }
-        return $this->_fetchBuilder($format);
+        return $this->fetchBuilder($format);
     }
 
-    protected function _fetchBuilder($format)
+    /**
+     * Creates builder by class
+     * @param $format
+     * @return mixed
+     */
+    protected function fetchBuilder($format)
     {
-        $className = self::BUILDER_NAMESPACE . '\\' . ucfirst(strtolower($format)) . self::RESPONSE_BUILDER_CLASS_POSTFIX;
+        $className = __NAMESPACE__ . '\\' . ucfirst(strtolower($format)) . self::RESPONSE_BUILDER_CLASS_POSTFIX;
         return new $className();
     }
 }

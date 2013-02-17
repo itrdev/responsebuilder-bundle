@@ -14,7 +14,7 @@ class JsonResponseBuilder extends AbstractResponseBuilder
      * @param int $httpStatusCode
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    protected function _prepareResponseObject(array $data, $httpStatusCode = 200)
+    protected function prepareResponseObject(array $data, $httpStatusCode = 200)
     {
         return new Response(json_encode($data), $httpStatusCode, array(
             'Content-Type' => 'application/json',

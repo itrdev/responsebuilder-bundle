@@ -14,11 +14,19 @@ class ParameterBag
 
     private $parameters;
 
+    /**
+     * @param array $initialParameters
+     */
     public function __construct(array $initialParameters = array())
     {
         $this->parameters = $initialParameters;
     }
 
+    /**
+     * Sets entity, collection or other value
+     * @param $key
+     * @param $value
+     */
     public function set($key, $value)
     {
         if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \Traversable) {
@@ -27,28 +35,33 @@ class ParameterBag
         } elseif ((is_array($value) || $value) instanceof \Traversable && is_object(current($value))) {
             $this->setEntityCollection($key, $value);
         } else {
-            $data = &$this->_findInjectionPoint($key, true);
+            $data = &$this->findInjectionPoint($key, true);
             $data = $value;
         }
     }
 
+    /**
+     * Sets entity
+     * @param $key
+     * @param $entity
+     * @param null $postProcessor
+     * @throws \Itr\ResponseBuilderBundle\Exception\InvalidParameterException
+     */
     public function setEntity($key, $entity, $postProcessor = null)
     {
-        if (!is_object($entity) || $entity instanceof \stdClass)
-        {
+        if (!is_object($entity) || $entity instanceof \stdClass) {
             throw new InvalidParameterException(get_class($entity) . " is not an entity");
         }
 
         // Finding the injection point and preparing our conversion array that will be injected.
         // Also, init the deferred execution queue for collections (these need to be injected after the conversion array
         // is ready, otherwise some values may be overwritten which is not we want).
-        $element = &$this->_findInjectionPoint($key, true);
+        $element = &$this->findInjectionPoint($key, true);
         $deferredExecutionQueue = new \SplQueue();
         $conversionArray = array();
 
         // Getting entity properties, will process all properties, however, public & protected need to have a getter
         // available in order to be processed.
-
         $refClass = new \ReflectionClass($entity);
         if ($entity instanceof \Doctrine\ORM\Proxy\Proxy) {
             $properties = $refClass->getParentClass()->getProperties();
@@ -56,17 +69,15 @@ class ParameterBag
             $properties = $refClass->getProperties();
         }
 
-        foreach ($properties as $property)
-        {
+        foreach ($properties as $property) {
 
             $value = null;
+
             // for protected and private methods we should call getter
-            if (($property->isPrivate() || $property->isProtected()) && $refClass->hasMethod(self::GETTER_PREFIX . ucfirst($property->getName())))
-            {
+            if (($property->isPrivate() || $property->isProtected()) && $refClass->hasMethod(self::GETTER_PREFIX . ucfirst($property->getName()))){
                 $value = $refClass->getMethod(self::GETTER_PREFIX . ucfirst($property->getName()))->invoke($entity);
-            }
-            elseif (!$property->isPrivate() && !$property->isProtected())
-            {
+
+            } elseif (!$property->isPrivate() && !$property->isProtected()) {
                 // otherwise just get the value directly
                 $value = $property->getValue($entity);
             }
@@ -85,60 +96,87 @@ class ParameterBag
         // Updating parameters
         $element = $conversionArray;
         // Executing deferred entity & collection insertions
-        $this->_executeDeferredInsertions($key, $deferredExecutionQueue);
+        $this->executeDeferredInsertions($key, $deferredExecutionQueue);
         // If post-processor is available, we execute it supplying the element, so it can trim the fields that aren't
         // necessary. If post-processor variable is an array, then we execute the whole chain.
-        if ($postProcessor)
-        {
-            $this->_executePostProcessor($postProcessor, $element);
+        if ($postProcessor) {
+            $this->executePostProcessor($postProcessor, $element);
         }
     }
 
+    /**
+     * Sets collections of entities
+     * @param $key
+     * @param $collection
+     * @param null $postProcessor
+     */
     public function setEntityCollection($key, $collection, $postProcessor = null)
     {
         $injectionPath = $key . self::KEY_PATH_SEPARATOR . self::KEY_ARRAY_ELEMENT;
-        foreach ($collection as $item)
-        {
-            if (is_object($item))
-            {
+        foreach ($collection as $item) {
+            if (is_object($item)) {
                 $this->setEntity($injectionPath, $item);
-            }
-            else
-            {
-                $element = &$this->_findInjectionPoint($injectionPath, true);
+
+            } else {
+                $element = &$this->findInjectionPoint($injectionPath, true);
                 $element = $item;
             }
         }
+
         // If post-processor is available, we execute it supplying the element, so it can trim the fields that aren't
         // necessary. If post-processor variable is an array, then we execute the whole chain.
-        if ($postProcessor)
-        {
-            $element = &$this->_findInjectionPoint($key);
-            $this->_executePostProcessor($postProcessor, $element);
+        if ($postProcessor) {
+            $element = &$this->findInjectionPoint($key);
+            $this->executePostProcessor($postProcessor, $element);
         }
     }
 
-    // TODO: remove method should remove key and value, not just set value as null
+    /**
+     * Removes element from bag
+     * TODO: remove method should remove key and value, not just set value as null
+     * @param $key
+     */
     public function remove($key)
     {
-        $element = &$this->_findInjectionPoint($key);
-        if ($element)
-        {
+        $element = &$this->findInjectionPoint($key);
+        if ($element) {
             $element = null;
         }
     }
 
+    /**
+     * Returns element by specified path
+     * @param $key
+     * @return array|null
+     */
     public function get($key)
     {
-        return $this->_findInjectionPoint($key);
+        return $this->findInjectionPoint($key);
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     public function has($key)
     {
-        return !is_null($this->_findInjectionPoint($key));
+        return !is_null($this->findInjectionPoint($key));
     }
 
+    /**
+     * Returns bag as array
+     * @return array
+     */
     public function toArray()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * Returns all parameters
+     * @return array
+     */
+    public function getParameters()
     {
         return $this->parameters;
     }
@@ -163,17 +201,14 @@ class ParameterBag
         $this->remove($key);
     }
 
-    public function debug()
-    {
-        var_dump($this->parameters);
-        die;
-    }
-
-    public function getParameters()
-    {
-        return $this->parameters;
-    }
-
+    /**
+     * Process values depends on type
+     * @param $property
+     * @param null $value
+     * @return int|\stdClass|\Traversable
+     * @throws \Itr\ResponseBuilderBundle\Exception\ExecuteAsDeferredCollectionException
+     * @throws \Itr\ResponseBuilderBundle\Exception\ExecuteAsDeferredEntityException
+     */
     protected function processPropertyValue($property, $value = null)
     {
         if ($value instanceof \DateTime) {
@@ -191,19 +226,23 @@ class ParameterBag
         return $value;
     }
 
-    protected function &_findInjectionPoint($key, $allowCreation = false)
+    /**
+     * Finds a point where to insert the value
+     * @param $key
+     * @param bool $allowCreation
+     * @return array|null
+     */
+    protected function &findInjectionPoint($key, $allowCreation = false)
     {
         $path = explode(self::KEY_PATH_SEPARATOR, $key);
         $element = &$this->parameters;
-        while ($currentKey = array_shift($path))
-        {
-            if (!$allowCreation && is_null($element))
-            {
+
+        while ($currentKey = array_shift($path)) {
+            if (!$allowCreation && is_null($element)) {
                 $element = null;
                 return $element;
             }
-            if (self::KEY_ARRAY_ELEMENT == $currentKey)
-            {
+            if (self::KEY_ARRAY_ELEMENT == $currentKey) {
                 $element = (is_array($element)) ? $element : array();
                 if (count($path) > 0) {
                     $currentKey = array_shift($path);
@@ -215,8 +254,7 @@ class ParameterBag
                     return $element[key($element)];
                 }
             }
-            if (is_null($element))
-            {
+            if (is_null($element)) {
                 $element = array($currentKey => null);
             }
 
@@ -225,29 +263,35 @@ class ParameterBag
         return $element;
     }
 
-    protected function _executeDeferredInsertions($key, \SplQueue $deferredExecutionQueue)
+    /**
+     * Executes deferred insertions
+     * @param $key
+     * @param \SplQueue $deferredExecutionQueue
+     */
+    protected function executeDeferredInsertions($key, \SplQueue $deferredExecutionQueue)
     {
-        foreach ($deferredExecutionQueue as $deferredItem)
-        {
+        foreach ($deferredExecutionQueue as $deferredItem) {
             $injectionPath = $key . self::KEY_PATH_SEPARATOR . $deferredItem['name'];
-            if (isset($deferredItem['entity']))
-            {
+            if (isset($deferredItem['entity'])) {
                 $this->setEntity($injectionPath, $deferredItem['entity']);
-            }
-            elseif (isset($deferredItem['collection']))
-            {
+
+            } elseif (isset($deferredItem['collection'])) {
                 $this->setEntityCollection($injectionPath, $deferredItem['collection']);
             }
         }
     }
 
-    protected function _executePostProcessor($postProcessor, &$element)
+    /**
+     * Executes post processor
+     * @param $postProcessor
+     * @param $element
+     * @throws \Itr\ResponseBuilderBundle\Exception\InvalidParameterException
+     */
+    protected function executePostProcessor($postProcessor, &$element)
     {
         $postProcessor = (is_array($postProcessor)) ? $postProcessor : array($postProcessor);
-        foreach ($postProcessor as $processor)
-        {
-            if (!$processor instanceof EntityPostProcessor)
-            {
+        foreach ($postProcessor as $processor) {
+            if (!$processor instanceof EntityPostProcessor) {
                 throw new InvalidParameterException(get_class($processor) . " does not implement the EntityPostProcessor interface");
             }
             $processor->postProcess($element);

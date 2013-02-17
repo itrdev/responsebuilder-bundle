@@ -6,7 +6,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractResponseBuilder
 {
-
     /**
      * Converts ParameterBag or array into Response object
      *
@@ -17,7 +16,7 @@ abstract class AbstractResponseBuilder
     public function build($parameters = array(), $httpStatusCode = 200)
     {
         $parameters = ($parameters instanceof ParameterBag) ? $parameters->toArray() : (array) $parameters;
-        return $this->_prepareResponseObject($parameters, $httpStatusCode);
+        return $this->prepareResponseObject($parameters, $httpStatusCode);
     }
 
     /**
@@ -38,5 +37,5 @@ abstract class AbstractResponseBuilder
      * @param int $httpResponseCode
      * @return mixed
      */
-    abstract protected function _prepareResponseObject(array $data, $httpResponseCode = 200);
+    abstract protected function prepareResponseObject(array $data, $httpResponseCode = 200);
 }
