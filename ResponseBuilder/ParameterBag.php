@@ -10,12 +10,12 @@ class ParameterBag
     const KEY_ARRAY_ELEMENT = '__array__';
     const GETTER_PREFIX = 'get';
 
-    private $_parameters;
-    private $_processed = array();
+    private $parameters;
+    private $processed = array();
 
     public function __construct(array $initialParameters = array())
     {
-        $this->_parameters = $initialParameters;
+        $this->parameters = $initialParameters;
     }
 
     public function set($key, $value)
@@ -162,7 +162,7 @@ class ParameterBag
 
     public function toArray()
     {
-        return $this->_parameters;
+        return $this->parameters;
     }
 
     public function __get($key)
@@ -187,19 +187,19 @@ class ParameterBag
 
     public function debug()
     {
-        var_dump($this->_parameters);
+        var_dump($this->parameters);
         die;
     }
 
     public function getParameters()
     {
-        return $this->_parameters;
+        return $this->parameters;
     }
 
     protected function &_findInjectionPoint($key, $allowCreation = false)
     {
         $path = explode(self::KEY_PATH_SEPARATOR, $key);
-        $element = &$this->_parameters;
+        $element = &$this->parameters;
         while ($currentKey = array_shift($path))
         {
             if (!$allowCreation && is_null($element))
@@ -261,12 +261,12 @@ class ParameterBag
 
     protected function _setProcessed($entity)
     {
-        $this->_processed[spl_object_hash($entity)] = $entity;
+        $this->processed[spl_object_hash($entity)] = $entity;
     }
 
     protected function _isProcessed($entity)
     {
-        return isset($this->_processed[spl_object_hash($entity)]) ? true : false;
+        return isset($this->processed[spl_object_hash($entity)]) ? true : false;
     }
 
 }
