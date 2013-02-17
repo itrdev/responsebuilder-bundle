@@ -3,6 +3,8 @@
 namespace Itr\ResponseBuilderBundle\ResponseBuilder;
 
 use Itr\ResponseBuilderBundle\Exception\InvalidParameterException;
+use Itr\ResponseBuilderBundle\Exception\ExecuteAsDeferredEntityException;
+use Itr\ResponseBuilderBundle\Exception\ExecuteAsDeferredCollectionException;
 
 class ParameterBag
 {
@@ -63,41 +65,19 @@ class ParameterBag
                 $value = $property->getValue($entity);
             }
 
-            if (is_object($value) && $value instanceof \DateTime)
-            {
-                $conversionArray[$property->getName()] = $value->getTimestamp();
-            }
-            elseif (is_object($value) && !$value instanceof \stdClass && !$value instanceof \Doctrine\Common\Collections\Collection)
-            {
+            try {
+                $conversionArray[$property->getName()] = $this->processPropertyValue($property, $value);
 
-                $conversionArray[$property->getName()] = null;
+            } catch (ExecuteAsDeferredEntityException $e) {
                 // Property is an entity, so process it recursively, but only after the initial array is built, i.e.
                 // via the deferredExecutionQueue
                 $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'entity' => $value));
-            }
-            else if (is_array($value) && is_object(current($value)) && !current($value) instanceof \stdClass)
-            {
-                // All entity collection insertions will take place after the conversion array is built.
-                // That's why we defer execution of such elements.
-                $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'collection' => $value));
-                // To maintain structure and field order, conversion array gets a stub value until the execution
-                $conversionArray[$property->getName()] = array();
-            }
-            elseif ($value instanceof \Doctrine\Common\Collections\Collection)
-            {
-                $value = $value->toArray();
 
-                // All entity collection insertions will take place after the conversion array is built.
-                // That's why we defer execution of such elements.
+            } catch (ExecuteAsDeferredCollectionException $e) {
+                // Property is an collection, so process it recursively, but only after the initial array is built, i.e.
+                // via the deferredExecutionQueue
                 $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'collection' => $value));
-                // To maintain structure and field order, conversion array gets a stub value until the execution
-                $conversionArray[$property->getName()] = array();
             }
-            else
-            {
-                $conversionArray[$property->getName()] = $value;
-            }
-
         }
         // Updating parameters
         $element = $conversionArray;
@@ -189,6 +169,23 @@ class ParameterBag
     public function getParameters()
     {
         return $this->parameters;
+    }
+
+    protected function processPropertyValue($property, $value = null)
+    {
+        if (is_object($value) && $value instanceof \DateTime) {
+            return $value->getTimestamp();
+        }
+
+        if (is_object($value) && !$value instanceof \stdClass && !$value instanceof \Doctrine\Common\Collections\Collection) {
+            throw new ExecuteAsDeferredEntityException();
+        }
+
+        if ((is_array($value) && is_object(current($value)) && !current($value) instanceof \stdClass) || $value instanceof \Doctrine\Common\Collections\Collection) {
+            throw new ExecuteAsDeferredCollectionException();
+        }
+
+        return $value;
     }
 
     protected function &_findInjectionPoint($key, $allowCreation = false)
