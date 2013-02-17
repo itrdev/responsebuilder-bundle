@@ -71,14 +71,9 @@ class ParameterBag
             {
 
                 $conversionArray[$property->getName()] = null;
-                if (!$this->_isProcessed($value))
-                {
-                    // Property is an entity, so process it recursively, but only after the initial array is built, i.e.
-                    // via the deferredExecutionQueue
-                    $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'entity' => $value));
-                    // To maintain structure and field order, conversion array gets a stub
-                }
-                $this->_setProcessed($entity);
+                // Property is an entity, so process it recursively, but only after the initial array is built, i.e.
+                // via the deferredExecutionQueue
+                $deferredExecutionQueue->enqueue(array('name' => $property->getName(), 'entity' => $value));
             }
             else if (is_array($value) && is_object(current($value)) && !current($value) instanceof \stdClass)
             {
@@ -258,15 +253,4 @@ class ParameterBag
             $processor->postProcess($element);
         }
     }
-
-    protected function _setProcessed($entity)
-    {
-        $this->processed[spl_object_hash($entity)] = $entity;
-    }
-
-    protected function _isProcessed($entity)
-    {
-        return isset($this->processed[spl_object_hash($entity)]) ? true : false;
-    }
-
 }
