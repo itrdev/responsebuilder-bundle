@@ -18,7 +18,24 @@ The best way to install ResponseBuilderBundle is through [Composer](http://getco
 
 2. Install your dependencies:
 
-        php composer.phar install
+``` bash
+        $ php composer.phar update itr/responsebuilder-bundle
+```
+
+3. Enable the bundle
+
+``` php
+        <?php
+        // app/AppKernel.php
+
+        public function registerBundles()
+        {
+            $bundles = array(
+                // ...
+                new Itr\ResponseBuilderBundle\ItrResponseBuilderBundle(),
+            );
+        }
+```
 
 ### Configuration
 
@@ -80,7 +97,9 @@ Or from service container for example from symfony controller:
 
             private $email;
 
-            ....
+            // getters and setters below
+            ...
+        }
 ```
 
 ``` php
