@@ -34,6 +34,7 @@ Basic Usage
 
 You can get ResponseBuilderFactory class directly:
 ``` php
+<?php
         // creates factory object
         $responseBuilderFactory = new ResponseBuilderFactory('json');
         // gets default builder (here default format is json)
@@ -44,6 +45,7 @@ You can get ResponseBuilderFactory class directly:
 
 Or from service container for example from symfony controller:
 ``` php
+<?php
         $responseBuilderFactory = $this->get('response_builder_factory');
         // gets default builder (default format could be specified in the configurations file like described above)
         $responseBuilder = $responseBuilderFactory->getDefault();
@@ -53,6 +55,7 @@ Or from service container for example from symfony controller:
 1. Simple example:
 
 ``` php
+<?php
         $pb = new ParameterBag();
         $pb->{'level.second.third'} = 'hi';
         $array = $pb->toArray();
@@ -67,6 +70,7 @@ Or from service container for example from symfony controller:
 2. Simple Doctrine entity example:
 
 ``` php
+<?php
         // let say we have account entity like this:
         class Account
         {
@@ -80,6 +84,7 @@ Or from service container for example from symfony controller:
 ```
 
 ``` php
+<?php
         $account = new Account();
         $account->setUsername('noname');
         $account->setEmail('test@example.com');
@@ -107,11 +112,62 @@ Or from service container for example from symfony controller:
         $response = $responseBuilder->build($pb);
 ```
 
-2. Complex Doctrine entity example:
+3. Complex Doctrine entity example:
 
 ``` php
+<?php
+        // let say we have account also have profile reference:
+        class Account
+        {
+            private $id;
+
+            private $username;
+
+            private $email;
+
+            // Profile
+            private $profile;
+
+            // getters and setters below
+            ...
+        }
+```
+
+``` php
+<?php
+        // let say we have account also have profile reference:
+        class Profile
+        {
+            private $id;
+
+            private $fullname;
+
+            private $age;
+
+            // getters and setters below
+            ...
+        }
+```
+
+``` php
+<?php
+
+        $profile = new Profile();
+        $profile->setFullname('Jack Jonson');
+        $profile->setAge(37);
+
+        $account = new Account();
+        $account->setUsername('noname');
+        $account->setEmail('test@example.com');
+        $account->setPassword('123456');
+        $account->setProfile($profile);
+
+        $pb = new ParameterBag();
+        $pb->{'account'} = $account;
+        $array = $pb->toArray();
+
         /*
-            If some of entity properties contain another entity (or collection of entities) it will be processed too:
+            Entity with sub entity will be processed like this:
 
             array('account' => array(
                     'username' => 'noname',
