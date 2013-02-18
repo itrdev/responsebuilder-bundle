@@ -22,11 +22,11 @@ The best way to install ResponseBuilderBundle is through [Composer](http://getco
 
 ### Configuration
 
-You can specify default builder format in you config.yml file:
+You can specify default builder format in your config.yml file:
 
         itr_response_builder:
             default_format: json
-            #default_format: json
+            # default_format: json
 
 Basic Usage
 ===========
@@ -84,12 +84,18 @@ Or from service container for example from symfony controller:
         $array = $pb->toArray();
 
         /*
+            Account entity processed as array:
+
             array('account' => array(
-                'username' => 'noname',
-                'email' => 'test@example.com',
-                'password' => '123456',
+                    'username' => 'noname',
+                    'email' => 'test@example.com',
+                    'password' => '123456',
             );
         */
+
+        // then you can change any value by accessing it directly by its path:
+        $pb->{'account.username'} = 'some new username';
+
         $responseBuilderFactory = $this->get('response_builder_factory');
         $responseBuilder = $responseBuilderFactory->getDefault();
         $response = $responseBuilder->build($pb);
@@ -101,13 +107,13 @@ Or from service container for example from symfony controller:
             If some of entity properties contain another entity (or collection of entities) it will be processed too:
 
             array('account' => array(
-                'username' => 'noname',
-                'email' => 'test@example.com',
-                'password' => '123456',
-                'profile' => array(
-                    'fullname' => 'Jack Jonson',
-                    'age' => 37,
-                )
+                    'username' => 'noname',
+                    'email' => 'test@example.com',
+                    'password' => '123456',
+                    'profile' => array(
+                        'fullname' => 'Jack Jonson',
+                        'age' => 37,
+                    )
             );
         */
 
