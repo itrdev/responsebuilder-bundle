@@ -23,34 +23,36 @@ The best way to install ResponseBuilderBundle is through [Composer](http://getco
 ### Configuration
 
 You can specify default builder format in your config.yml file:
-
+``` yml
         itr_response_builder:
             default_format: json
             # default_format: json
-
+```
 Basic Usage
 ===========
 ### ResponseBuilder
 
 You can get ResponseBuilderFactory class directly:
-
+``` php
         // creates factory object
         $responseBuilderFactory = new ResponseBuilderFactory('json');
         // gets default builder (here default format is json)
         $responseBuilder = $responseBuilderFactory->getDefault();
         // gets builder by specified format
         $responseBuilder = $responseBuilder->getBuilderForFormat('yml');
+```
 
 Or from service container for example from symfony controller:
-
+``` php
         $responseBuilderFactory = $this->get('response_builder_factory');
         // gets default builder (default format could be specified in the configurations file like described above)
         $responseBuilder = $responseBuilderFactory->getDefault();
-
+```
 ### ParameterBag
 
 1. Simple example:
 
+``` php
         $pb = new ParameterBag();
         $pb->{'level.second.third'} = 'hi';
         $array = $pb->toArray();
@@ -60,9 +62,11 @@ Or from service container for example from symfony controller:
         $responseBuilder = $responseBuilderFactory->getDefault();
         // return Response object with parameter bag processed into specified format (json or xml)
         $response = $responseBuilder->build($pb);
+```
 
 2. Simple Doctrine entity example:
 
+``` php
         // let say we have account entity like this:
         class Account
         {
@@ -73,7 +77,9 @@ Or from service container for example from symfony controller:
             private $email;
 
             ....
+```
 
+``` php
         $account = new Account();
         $account->setUsername('noname');
         $account->setEmail('test@example.com');
@@ -99,10 +105,11 @@ Or from service container for example from symfony controller:
         $responseBuilderFactory = $this->get('response_builder_factory');
         $responseBuilder = $responseBuilderFactory->getDefault();
         $response = $responseBuilder->build($pb);
-
+```
 
 2. Complex Doctrine entity example:
 
+``` php
         /*
             If some of entity properties contain another entity (or collection of entities) it will be processed too:
 
@@ -116,7 +123,7 @@ Or from service container for example from symfony controller:
                     )
             );
         */
-
+```
 TODO
 ====
 -   ParameterBag code refactoring.
