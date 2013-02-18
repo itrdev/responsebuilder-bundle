@@ -8,7 +8,7 @@ Getting Started
 
 The best way to install ResponseBuilderBundle is through [Composer](http://getcomposer.org).
 
-1. Add ``itr/responsebuilder-bundle`` as a dependency in your project's ``composer.json`` file:
+- Add ``itr/responsebuilder-bundle`` as a dependency in your project's ``composer.json`` file:
 
 ```js
 {
@@ -17,13 +17,13 @@ The best way to install ResponseBuilderBundle is through [Composer](http://getco
     }
 }
 ```
-2. Install your dependencies:
+- Install your dependencies:
 
 ``` bash
 $ php composer.phar update itr/responsebuilder-bundle
 ```
 
-3. Enable the bundle
+- Enable the bundle
 
 ``` php
 <?php
@@ -70,7 +70,7 @@ Or from service container for example from symfony controller:
 ```
 ### ParameterBag
 
-1. Simple example:
+- Simple example:
 
 ``` php
 <?php
@@ -85,11 +85,11 @@ Or from service container for example from symfony controller:
     $response = $responseBuilder->build($pb);
 ```
 
-2. Simple Doctrine entity example:
+- Simple Doctrine entity example:
 
+Let say we have account entity like this:
 ``` php
 <?php
-    // let say we have account entity like this:
     class Account
     {
         private $id;
@@ -103,6 +103,7 @@ Or from service container for example from symfony controller:
     }
 ```
 
+Now you can process it this way:
 ``` php
 <?php
     $account = new Account();
@@ -132,11 +133,11 @@ Or from service container for example from symfony controller:
     $response = $responseBuilder->build($pb);
 ```
 
-3. Complex Doctrine entity example:
+- Complex Doctrine entity example:
 
+Let say account also have reference on a profile object:
 ``` php
 <?php
-    // let say we have account also have profile reference:
     class Account
     {
         private $id;
@@ -153,9 +154,9 @@ Or from service container for example from symfony controller:
     }
 ```
 
+Profile entity:
 ``` php
 <?php
-    // let say we have account also have profile reference:
     class Profile
     {
         private $id;
@@ -169,6 +170,7 @@ Or from service container for example from symfony controller:
     }
 ```
 
+Processing entity with subentity:
 ``` php
 <?php
     $profile = new Profile();
