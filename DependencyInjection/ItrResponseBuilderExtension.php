@@ -21,7 +21,7 @@ class ItrResponseBuilderExtension extends Extension
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
-        $container->setParameter('itr_response_builder.default_value', $config['default_value']);
+        $container->setParameter('itr_response_builder.default_format', $config['default_format']);
 
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
