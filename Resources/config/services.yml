@@ -1,5 +1,5 @@
 parameters:
-    itr_response_builder.response_builder_factory.class: Itr\ResponseBuilderBundle\Service\ResponseBuilderFactory
+    itr_response_builder.response_builder_factory.class: Itr\ResponseBuilderBundle\ResponseBuilder\ResponseBuilderFactory
 
 services:
     itr_response_builder.response_builder_factory:
